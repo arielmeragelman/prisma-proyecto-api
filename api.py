@@ -1,5 +1,15 @@
 from fastapi import FastAPI, UploadFile
 import os
+import logging
+
+# Logging config
+logging.basicConfig(
+    level= logging.INFO,
+    filename='result.log',
+    filemode= 'a',
+    datefmt= '%d - %b-%y %H:%M:%S',
+    format='%(asctime)s - %(levelname)s - %(message)s')
+
 app = FastAPI()
 
 
@@ -14,12 +24,16 @@ async def create_upload_file(file: UploadFile):
         log: success or fail as a logger response.
     '''
 
-    folder = './data'
-    # Create folder if it doesn't exist.
-    if not os.path.isdir(folder):
-        os.mkdir(folder)
+    try:
+        folder = './data'
+        # Create folder if it doesn't exist.
+        if not os.path.isdir(folder):
+            os.mkdir(folder)
 
-    file_location = f"{folder}/{file.filename}" # Guardar a la carpeta 'data'.
-    with open(file_location, "wb+") as file_object:
-        file_object.write(file.file.read())
-    return {"info": f"file '{file.filename}' saved at '{file_location}'"}
+        file_location = f"{folder}/{file.filename}" # Save to the 'data' folder.
+        with open(file_location, "wb+") as file_object:
+            file_object.write(file.file.read())
+        logging.info({"info": f"file '{file.filename}' saved at '{file_location}'"})
+
+    except Exception as e:
+        logging.error({"info": f"file '{file.filename}' has not been saved at '{file_location}'. Full error: '{e}'"})
